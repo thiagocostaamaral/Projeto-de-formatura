@@ -14,7 +14,7 @@ def normal(x,avg,std):
     upper_term = -(x-avg)**2/(2*std**2)
     f = 1/((2*pi)**0.5 *std) * math.exp(upper_term)
     return f
-
+print('oi')
 def include_3dnormal(df,x_column,y_column, avg_x,std_x,avg_y,std_y,factor,z_column_out):
     df['z_x']=df[x_column].apply(lambda x: factor*normal(x,avg_x,std_x))
     df['z_y']=df[y_column].apply(lambda x: factor*normal(x,avg_y,std_y))
