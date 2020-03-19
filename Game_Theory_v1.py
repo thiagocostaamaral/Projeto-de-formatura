@@ -17,7 +17,7 @@ def normal(x,avg,std):
 
 def include_3dnormal(df,x_column,y_column, avg_x,std_x,avg_y,std_y,factor,z_column_out):
     df['z_x']=df[x_column].apply(lambda x: factor*normal(x,avg_x,std_x))
-    df['z_y']=df[y_column].apply(lambda x: factor*normal(x,avg_y,std_y))
+    df['z_y']=df[y_column].apply(lambda y: factor*normal(y,avg_y,std_y))
     df[z_column_out]=df['z_x']*df['z_y']
     df.drop(columns =['z_x','z_y'],inplace = True)
     return df
@@ -50,8 +50,22 @@ def plot_3D(df,x_variable='x',y_variable='y',z_variable='z'):
     ax.set_zlabel(z_variable)
     plt.show()
 
-def get_score(position):
-    pass
+def move_score(position):
+    """Function to get score of a position given by the player
+    
+    Arguments:
+        position {[array]} -- [position of the player move]
+    
+    Returns:
+        [float] -- [returns the score of the position given]
+    """
+    avg_x,std_x = 15,7
+    avg_y,std_y = 38,10
+    factor =200
+    z1 = factor*normal(position[0],avg_x,std_x)   * factor * normal(position[1],avg_y,std_y)
+    z2 = factor*normal(position[0],avg_x*2,std_x) * factor * normal(position[1],avg_y/2,std_y)
+    score = z1 + z2
+    return score
 
 class player:
     def __init__(self,position, space_range,gambles=5,start_variable=0, score=0):
@@ -62,20 +76,36 @@ class player:
         self.score = score
         self.gambles = gambles
         self.test_positions=[]
+        self.test_scores=[]
 
-    def update(self):
+    def update_tests(self,game_function):
         test_positions =[]
+        test_scores =[]
         start,end = self.space_range[self.analysed_variable][0],self.space_range[self.analysed_variable][1]
         step = (end-start)/(self.gambles-1)
         new_variable_positions=np.arange(start=start,stop=end+step,step=step)
         for gamble in range(self.gambles):
             new_position = self.position.copy()
             new_position[self.analysed_variable] = new_variable_positions[gamble]
+            new_score = game_function(new_position)
             test_positions.append(new_position)
-        self.score =1
-        self.test_positions = test_positions
+            test_scores.append(new_score)
+        self.test_positions =test_positions
+        self.test_scores = test_scores
+    
+    def update(self):
+        biggest_score = self.score
+        for gamble in range(len(self.test_scores)):
+            if self.test_scores[gamble] >= self.score:
+                cprint('Player have found a better position','green')
+                print('New position = ',self.test_positions[gamble])
+                print('New score = ',self.test_scores[gamble])
+                self.score = self.test_scores[gamble]
+                self.position = self.test_positions[gamble]
+            gamble_number+=1
 
- 
+
+
 #Define variables
 n_variablesx=50
 n_variablesy=50
@@ -98,7 +128,9 @@ samples_df['z']=samples_df['z1']+samples_df['z2']
 #plot_3D(samples_df)
 
 #Now the we have our system we can worry about the players
-player1 = player(position = [25,25],space_range= [[0,50],[0,50]],gambles=10)
+player1 = player(position = [25,25], space_range = [[0,50],[0,50]], gambles=10)
 print(player1.test_positions)
-player1.update()
+print(player1.test_scores)
+player1.update_tests(move_score)
 print(player1.test_positions)
+print(player1.test_scores)
