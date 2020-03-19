@@ -14,7 +14,7 @@ def normal(x,avg,std):
     upper_term = -(x-avg)**2/(2*std**2)
     f = 1/((2*pi)**0.5 *std) * math.exp(upper_term)
     return f
-print('oi')
+
 def include_3dnormal(df,x_column,y_column, avg_x,std_x,avg_y,std_y,factor,z_column_out):
     df['z_x']=df[x_column].apply(lambda x: factor*normal(x,avg_x,std_x))
     df['z_y']=df[y_column].apply(lambda x: factor*normal(x,avg_y,std_y))
@@ -50,6 +50,9 @@ def plot_3D(df,x_variable='x',y_variable='y',z_variable='z'):
     ax.set_zlabel(z_variable)
     plt.show()
 
+def get_score(position):
+    pass
+
 class player:
     def __init__(self,position, space_range,gambles=5,start_variable=0, score=0):
         self.position=position
@@ -58,6 +61,7 @@ class player:
         self.analysed_variable = start_variable
         self.score = score
         self.gambles = gambles
+        self.test_positions=[]
 
     def update(self):
         test_positions =[]
@@ -68,8 +72,10 @@ class player:
             new_position = self.position.copy()
             new_position[self.analysed_variable] = new_variable_positions[gamble]
             test_positions.append(new_position)
-            pass
+        self.score =1
+        self.test_positions = test_positions
 
+ 
 #Define variables
 n_variablesx=50
 n_variablesy=50
@@ -89,11 +95,10 @@ samples_df = include_3dnormal(samples_df,'x','y', avg_x*2,std_x,avg_y/2,std_y,fa
 samples_df['z']=samples_df['z1']+samples_df['z2']
 
 #Just to show image:
-plot_3D(samples_df)
+#plot_3D(samples_df)
 
-end=10
-start=0
-gambles=7
-step = (end-start)/(gambles-1)
-new_variable_positions=np.arange(start=start,stop=end+step,step=step)
-print(new_variable_positions)
+#Now the we have our system we can worry about the players
+player1 = player(position = [25,25],space_range= [[0,50],[0,50]],gambles=10)
+print(player1.test_positions)
+player1.update()
+print(player1.test_positions)
